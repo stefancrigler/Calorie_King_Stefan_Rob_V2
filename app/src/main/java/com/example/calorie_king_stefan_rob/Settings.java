@@ -38,6 +38,20 @@ public class Settings extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
         Log.d("db", "here");
+        db.collection("calorie_goals")
+                .get()
+                .addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                        if (task.isSuccessful()) {
+                            for (QueryDocumentSnapshot document : task.getResult()) {
+                                Log.d("db", document.getId() + " => " + document.getData());
+                            }
+                        } else {
+                            Log.w("db", "Error getting documents.", task.getException());
+                        }
+                    }
+                });
 
     }
 
@@ -55,18 +69,19 @@ public class Settings extends AppCompatActivity {
             Log.d("db","Beginning add");
             Map<String, String> cg = new HashMap<>();
             cg.put("calorie_goal",goal_update.getText().toString());
-            db.collection("calorie_goals")
-                    .add(cg)
-                    .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+            cg.put("current_day","300");
+            db.collection("calorie_goals").document("tester")
+                    .set(cg)
+                    .addOnSuccessListener(new OnSuccessListener<Void>() {
                         @Override
-                        public void onSuccess(DocumentReference documentReference) {
-                            Log.d("db", "DocumentSnapshot added with ID: " + documentReference.getId());
+                        public void onSuccess(Void aVoid) {
+                            Log.d("db", "DocumentSnapshot successfully written!");
                         }
                     })
                     .addOnFailureListener(new OnFailureListener() {
                         @Override
                         public void onFailure(@NonNull Exception e) {
-                            Log.w("db", "Error adding document", e);
+                                Log.w("db", "Error writing document", e);
                         }
                     });
         }
